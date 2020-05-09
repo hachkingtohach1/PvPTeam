@@ -1,0 +1,8 @@
+---
+name: PvPTeam
+version: 1.0
+main: hachkingtohach1\pvpteam\Main
+api: 3.0.0
+author: DragoVN
+description: One plugin minegames for PocketMine_PMMP
+...
