@@ -14,14 +14,18 @@ use pocketmine\Player;
 class Commands extends Command implements PluginIdentifiableCommand {
 
     /** @var $plugin */
-    protected $plugin;
+    public $plugin;
 	
 	/** @var $data */
 	protected $data;
+	
+	/** @var $config */
+	public $config;
 
     public function __construct(Main $plugin) 
 	{		
         $this->plugin = $plugin;
+		$this->config = $this->plugin->configArena();
 		$this->data = $this->plugin->getArenasData;
         parent::__construct("pvpteam", "PvPTeam commands", \null, ["pt"]);
     }
@@ -52,6 +56,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     "/pt create : Create arena\n".
                     "/pt remove : Remove arena\n".
                     "/pt setup : Setup arena\n".
+					"/pt join : Join arena\n".
                     "/pt list : Displays list of arenas"
 				);
             break;
@@ -60,20 +65,26 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
-				$object = [				    
+				$object = [		                   			
 				    'minslots' => 2,
 					'maxslots' => 10,
 					'timeend' => 5*60,
 					'starttime' => 30,
 					'restarttime' => 10,
+					'status' => 0,
+					'maxslotsperteam' => 2,
 					'teams' => [],
 					'players' => [],
-					'spectator' => [],
+					'spectators' => [],
                     'spawnteam' => [],
-                    'spawnlobby' => null,					
-                    'level' => null					
+                    'spawnlobby' => null,
+                    'spawnspectator' => null,					
+                    'level' => null,
+					'name' => $args[1],						
+                    'enable' => false					
 				];
 				$this->data->set($args[1], $object);
+				$this->data->save();
 				$sender->sendMessage("Arena with name ".$args[1]." have been created!");
 			break;
 			case 'remove':
@@ -93,51 +104,134 @@ class Commands extends Command implements PluginIdentifiableCommand {
 					$sender->sendMessage("Arena with name ".$args[1]." not found!");
 					break;
 				}
+				if(!isset($args[2])) {					
+					$sender->sendMessage(
+					    "/pt setup [name] level [name_level]\n".
+					    "/pt setup [name] minslots [int_slots]\n".
+					    "/pt setup [name] maxslots [int_slots]\n".
+					    "/pt setup [name] timeend [int_time]\n".
+					    "/pt setup [name] starttime [int_time]\n".
+					    "/pt setup [name] restarttime [int_time]\n".
+					    "/pt setup [name] teams [name]\n".
+					    "/pt setup [name] setspawnlobby\n".
+					    "/pt setup [name] spawnspectator\n".
+						"/pt setup [name] maxslotsperteam [int_slots]\n".
+						"/pt setup [name] enable [true/false]"
+					);
+					break;
+				}
 				switch($args[2]) {
+					case 'level':
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] level [name_level]");
+							break;
+						}
+					    $this->config->changeDataArena($sender, $args[1], 'level', $args[3]);
+						$sender->sendMessage("SETUP: Level for arena ".$args[1]." is ".$args[3]);
+					break;
 					case 'minslots':
-					    $this->data->set($args[1]['minslots'], $args[3]);
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] minslots [int_slots]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'minslots', $args[3]);
 						$sender->sendMessage("SETUP: Minslots for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'maxslots':
-					    $this->data->set($args[1]['maxslots'], $args[3]);
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] maxslots [int_slots]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'maxslots', $args[3]);
 						$sender->sendMessage("SETUP: Maxslots for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'timeend':
-					    $this->data->set($args[1]['timeend'], $args[3]);
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] timeend [int_time]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'timeend', $args[3]);
 						$sender->sendMessage("SETUP: Timeend for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'starttime':
-					    $this->data->set($args[1]['starttime'], $args[3]);
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] starttime [int_time]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'starttime', $args[3]);
+						$sender->sendMessage("SETUP: Starttime for arena ".$args[1]." is ".$args[3]);
+					break;
+					case 'enable':
+					    if(!isset($args[3]) or in_array($args[3], [true, false])) {
+							$sender->sendMessage("Usage: /pt setup [name] enable [true/false]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'starttime', $args[3]);
 						$sender->sendMessage("SETUP: Starttime for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'restarttime':
-					    $this->data->set($args[1]['restarttime'], $args[3]);
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] restarttime [int_time]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'restarttime', $args[3]);
 						$sender->sendMessage("SETUP: Restarttime for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'teams':
-					    $this->data->set($args[1]['teams'], [$args[3]]);
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] teams [name]");
+							break;
+						}
+						$this->config->addTeamArena($sender, $args[1], $args[3]);
+						$sender->sendMessage("SETUP: New team for arena ".$args[1]." is ".$args[3]);
+					break;
+					case 'maxslotsperteam':
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] maxslotsperteam [int_slots]");
+							break;
+						}
+						$this->config->changeDataArena($sender, $args[1], 'maxslotsperteam', $args[3]);
 						$sender->sendMessage("SETUP: New team for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'setspawnt':
-                        if(empty($this->data->get($args[1]['teams'][$args[3]]))) {
+					    if(!isset($args[3])) {
+							$sender->sendMessage("Usage: /pt setup [name] setspawnt [name]");
+							break;
+						}
+                        if(empty($this->data->get([$args[1]]['teams'][$args[3]]))) {
 							$sender->sendMessage("SETUP: Team not found!");
 							break;
 						}							
 						$sender->sendMessage("SETUP: Now to break one block to set spawn for team ".$args[3]);
-					    $this->plugin->setup[$player->getName()] = [$args[1], $args[3], 0];
+					    $this->plugin->setup[$sender->getName()] = [$args[1], $args[3], 0];
 					break;
-					case 'setspawnlobby':							
-						$sender->sendMessage("SETUP: Now to break one block to set spawn for team ".$args[3]);
-					    $this->plugin->setup[$player->getName()] = [null, null, 1];
+					case 'setspawnlobby':					
+						$sender->sendMessage("SETUP: Now to break one block to set spawn lobby ");
+					    $this->plugin->setup[$sender->getName()] = [$args[1], null, 1];
+					break;
+					case 'setspawnspectator':
+					    $sender->sendMessage("SETUP: Now to break one block to set spawn spectator");
+					    $this->plugin->setup[$sender->getName()] = [$args[1], null, 2];
 					break;
 				}
+			break;
+			case 'join':
+			    if(!$sender->hasPermission('pvp.team.cmd.join')) {
+                    $sender->sendMessage("You have not permissions to use this command!");
+                    break;
+                }
+				if(empty($this->data->get($args[1]))) {
+					$sender->sendMessage("Arena can not found!");
+					break;
+				}
+				$this->plugin->getArena()->onJoinArena($sender, $args[1], true);
 			break;
 			case 'list':
 			    if(!$sender->hasPermission('pvp.team.cmd.list')) {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
-			    foreach($this->plugin->arenas as $name) {
+			    foreach($this->plugin->getArena()->arenas as $name) {
 					$status = $name['where'];
 					$sender->sendMessage("--- List Arenas ---");
 					$sender->sendMessage($name." | ".$status);

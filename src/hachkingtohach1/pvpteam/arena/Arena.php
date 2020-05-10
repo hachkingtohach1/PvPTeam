@@ -29,13 +29,10 @@ class Arena {
 	public $arenas = [];
 	
 	/** @var array */
-	public $countslots = [];
-	
-	/** @var array */
 	public $data = [];
 	
-	/** @var array */
-	public $status = [];
+	/** @var bool $loaded */
+	public $loaded = false;
 	
 	/** @var CONST */
 	public const WAITING = 0, PLAYING = 1, RESTARTING = 2;
@@ -43,30 +40,23 @@ class Arena {
     public function __construct(Main $plugin, string $namearena, array $data, bool $load = \false) 
 	{
 		$this->plugin = $plugin;
-		$this->getdata = $this->plugin->getArenasData();
-		if($load == true) {
-		    $this->loadDataArena($namearena, $data);
-		    $this->LoadLevelArena();
+		$this->getdata = $this->plugin->getArenasData;
+		if(!$load) {		
+		    $this->arenas[$namearena] = $this->getdata->get($namearena);
+			$this->LoadLevelArena();
+			$this->loaded = true;
 		}
 		$this->plugin->getScheduler()->scheduleRepeatingTask
 		($this->scheduler = new ArenaScheduler($this), 20);
-    }
-	
-   /**
-	* function use to create data on array for arenas from config
-	*/
-	public function loadDataArena(string $namearena, array $data) 
-	{		
-		if(empty($this->arenas[$name])) 
-		{
-		    $this->arenas[$name] = $data;
-		} 		
-	}
+    }		
 
     public function LoadLevelArena() 
 	{
-		foreach($this->arenas as $name) {
+		foreach($this->arenas as $name) {					
+			
 			$world = $name['level'];
+			$name = $name['name'];
+			if($world === null) return;
 		    if(!$this->plugin->getServer()->isLevelGenerated($world)) {
 				$this->plugin->getLogger()->warning($name.' can not load level');
                 return;
@@ -78,77 +68,82 @@ class Arena {
 	}		
 	
 	public function onJoinArena(Player $player, string $name, bool $spectator = \false) 
-	{		
+	{
 		$namep = $player->getName();
-		if(empty($this->arenas[$name])) 
-		{
-			$player->sendMessage("Arena isn't found!");
-		}
-		if(
-		    $this->arenas[$name]['minslots'] 
-		    == 
-			$this->arenas[$name]['maxslots']
-		) {
-			$player->sendMessage("Arena is full!");
-		}
-		
-        if($spectator === true) 
-		{
-			$spectator = $this->arenas[$name]['spectator'];
-			$spectator[$player->getName()] = $player;
-			return;
-		}		
-		
-		$this->arenas[$name]['players'][$player->getName()] = $player;
-		
-		foreach($this->arenas[$name]['teams'] as $team) 
-		{			
-			$data = $this->arenas[$name]['teams'];
-			$players = $data[$team]['players'];
+	    $arena = $this->arenas[$name];
 			
-			if(
-			    count($team['players']) == 0
-			) {						
-				$players[$namep] = $player;
-				$this->countslots[$name][$team] += 1;
-				return;
+		if($arena['name'] == $name) {
+		    if(
+		        count($arena['players'])
+		        == 
+			    $arena['maxslots']
+		    ) {
+			    $player->sendMessage("Arena is full!");
+		    }
+		
+            if(!$spectator) 
+		    {
+			    $spectator = $arena['spectators'];
+			    $spectator[$player->getName()] = $player;
+			    $player->teleport(
+				    Position::fromObject(
+					    Vector3::fromString($arena['spawnspectator'])
+					    ->add(0.5, 0, 0.5), 
+					    $this->getLevel($arena['level'])
+				    )
+			    );
+			    return;
+		    }	
+
+		    $arena['players'][$player->getName()] = $player;
+		
+		    foreach($arena['teams'] as $team) 
+		    {			
+			    $players = $team['players'];
+			
+			    if(
+			        count($players) == 0
+			    ) {						
+				    $players[$namep] = $player; 				    
+			    }
+			    if(
+			        count($players) == count($players) 
+				    && count($players) != $arena['maxslotsperteam']
+			    ) {				
+				    $players[$namep] = $player;				    
+			    }  
+                $player->teleport(
+				    Position::fromObject(
+					    Vector3::fromString($arena['spawnlobby'])
+					    ->add(0.5, 0, 0.5), 
+					    $this->getLevel($arena['level'])
+				    )
+			    );
+				$player->sendMessage("You are join the game!");				
+			    $this->sendBroadcastMsg($name, "{$player->getName()} has join the game!");
 			}
-			if(
-			    count($team['players']) == $this->countslots[$name][$team] 
-				&& $this->countslots[$name][$team] != $team['maxslots']
-			) {				
-				$players[$namep] = $player;
-				$this->countslots[$name][$team] += 1;
-			}
-            $player->teleport(
-				Position::fromObject(
-					Vector3::fromString($this->arenas[$name]['spawnlobby'])
-					->add(0.5, 0, 0.5), 
-					$this->arenas[$name]['level']
-				)
-			);			
-			$this->sendBroadcastMsg($name, "{$player->getName()} has join the game!");
 		}		
 	}
 	
 	public function onLeaveArena(Player $player, bool $spectator = \false) 
 	{
-		$namep = $player->getName();		
-		foreach($this->arenas as $name) 
+		$namep = $player->getName();			        
+		
+		foreach($this->arenas as $arena) 
 		{	
-            if($spectator === true) 
+            if(!$spectator) 
 			{
-			    $spectator = $this->arenas[$name]['spectator'];
+			    $spectator = $this->arenas[$arena['name']]['spectators'];
 			    unset($spectator[$player->getName()]);
 				$player->sendMessage("You are left the game!");
 			    return;
 			}
 			
-            unset($name['players'][$namep]);
+            unset($this->arenas[$arena['name']]['players'][$namep]);
 			
-		    foreach($this->arenas[$name]['teams'] as $team) 
+		    foreach($this->arenas[$arena['name']]['teams'] as $team) 
 			{	      			
-			    $data = $this->arenas[$name]['teams'];
+			    $data = $this->arenas[$arena['name']]['teams'];
 			    $players = $data[$team]['players'];
 			
 			    if(!empty($players[$namep])) 
@@ -163,26 +158,26 @@ class Arena {
 	
 	public function startTheGame() 
 	{		
-		foreach($this->arenas as $name) 
+		foreach($this->arenas as $arena) 
 		{
-            if($this->arenas[$name]['starttime'] == 0) 
+            if($this->arenas[$arena['name']]['starttime'] == 0) 
 			{			
-		        $this->sendBroadcastMsg($name, "Started!");
-				$this->status[$name] = self::PLAYING;				
+		        $this->sendBroadcastMsg($arena['name'], "Started!");
+				$this->arenas[$arena['name']]['status'] = self::PLAYING;			
 			}
-			foreach($this->arenas[$name]['teams'] as $team)
+			foreach($this->arenas[$arena['name']]['teams'] as $team)
 			{
-				$this->playersStartGame($name);
-				$data = $this->arenas[$name]['teams'];
+				$this->playersGame($name);
+				$data = $this->arenas[$arena['name']]['teams'];
 			    $players = $data[$team]['players'];
-				foreach($this->arenas[$name]['players'] as $player) {
+				foreach($this->arenas[$arena['name']]['players'] as $player) {
 				    if(!empty($players[$player->getName])) 
 				    {
 			            $player->teleport(
 					        Position::fromObject(
-						        Vector3::fromString($this->arenas[$name]['spawnteam'][$team])
+						        Vector3::fromString($this->arenas[$arena['name']]['spawnteam'][$team])
 								->add(0.5, 0, 0.5), 
-							    $this->arenas[$name]['level']
+							    $this->getLevel($this->arenas[$arena['name']]['level'])
 						    )
 					    );
 				    }
@@ -194,42 +189,41 @@ class Arena {
 	public function gameOver(string $name) 
 	{		
 		$this->sendBroadcastMsg($name, "Game Over!");
-		$this->playersGameOver($name);
-	    $this->status[$name] = self::RESTARTING;	
+		$this->playersGame($name);
+		$this->arenas[$name]['status'] = self::RESTARTING;			
 	}
 
     public function inGame(Player $player) : bool
 	{
 		$namep = $player->getName();		
-		foreach($this->arenas as $name) 
+		foreach($this->arenas as $arena) 
 		{			
-		    foreach($this->arenas[$name]['teams'] as $team) 
+		    foreach($this->arenas[$arena['name']]['teams'] as $team) 
 			{			
-			    $data = $this->arenas[$name]['teams'];
-			    $players = $data[$team]['players'];
+			    $players = $team['players'];
 				if(!empty($players[$namep])) 
 				{
-					return false;
-				} 
-				return true;
+					return true;
+				} 				
 			}
 		}
+		return false;
 	}
 	
 	public function reloadDataArena(string $name) 
 	{
-        $this->arenas[$name] = $this->getData->get($name);
+        $this->arenas[$name] = $this->getdata->get($name);
 	}
 
     public function countPlayers() : int
 	{
-		foreach($this->arenas as $name) 
+		foreach($this->arenas as $arena) 
 		{			
-		    $players = $this->arenas[$name]['players'];
-			return count($players);
-		}
+		    $players = $this->arenas[$arena['name']]['players'];
+            return count($players);			
+		}		
 	}		
-	
+
 	public function sendBroadcastMsg(string $name, string $text) 
 	{
 		$players = $this->arenas[$name]['players'];
@@ -250,16 +244,25 @@ class Arena {
 	
 	public function getAllStatus() 
 	{
-		foreach($this->arenas as $name) 
+		foreach($this->arenas as $arena) 
 		{
-			return $this->status[$name];
+			$status = $this->arenas[$arena['name']]['status'];
+			return $status;
 		}
 	}
 	
-	public function playersStartGame(string $name) 
+	public function playersGame(string $name) 
 	{
-		foreach($this->arenas[$name]['players'] as $player) {		    
-            $player->setGamemode($player::ADVENTURE);
+		foreach($this->arenas[$name]['players'] as $player) {	
+            switch($arena->getAllStatus()) 
+			{
+				case self::WAITING:
+				    $player->setGamemode($player::ADVENTURE);
+				break;
+				case self::PLAYING:
+				    $player->setGamemode($this->plugin->getServer()->getDefaultGamemode());
+                break;				
+			}				                
             $player->setHealth(20);
             $player->setFood(20);
 			$player->removeAllEffects();
@@ -269,17 +272,9 @@ class Arena {
 		}
 	}
 	
-	public function playersGameOver(string $name) 
-	{
-		foreach($this->arenas[$name]['players'] as $player) {		    
-            $player->setGamemode($this->plugin->getServer()->getDefaultGamemode());
-            $player->setHealth(20);
-            $player->setFood(20);
-			$player->removeAllEffects();
-            $player->getInventory()->clearAll();
-            $player->getArmorInventory()->clearAll();
-            $player->getCursorInventory()->clearAll();
-		}
+	public function getLevel(string $name) 
+	{ 
+	    return $this->plugin->getServer()->getLevelByName($name);
 	}
 	
 	public function __destruct() 

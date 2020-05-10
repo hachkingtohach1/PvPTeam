@@ -25,55 +25,55 @@ class ArenaScheduler extends Task {
     */
     public function onRun(int $currentTick) 
 	{
-        $arena = $this->plugin;
-        
-        if($arena->setup) return;
-        
-        switch($arena->getAllStatus()) 
+        $arenabase = $this->plugin;
+		
+        if($arenabase->loaded === false) return;
+		
+        switch($arenabase->getAllStatus()) 
 		{
             case Arena::WAITING:
-			    if($arena->countPlayers() >= $this->minplayers) 
+			    if($arenabase->countPlayers() >= $this->minplayers) 
 				{
-					foreach($arena->arenas as $name) 
+					foreach($arenabase->arenas as $arena) 
 					{
-						$arena->arenas[$name]['starttime']--; 
-						if($arena->arenas[$name]['starttime'] == 0) 
+						$arenabase->arenas[$arena['name']]['starttime']--; 
+						if($arenabase->arenas[$arena['name']]['starttime'] == 0) 
 						{
-							$arena->startTheGame($name);
+							$arenabase->startTheGame($arena);
 						}
 					}
 				} else {
-					foreach($arena->arenas as $name) 
+					foreach($arenabase->arenas as $arena) 
 					{
-					    $arena->sendBroadcastPopup($name, "Waiting!");
+					    $arenabase->sendBroadcastPopup($arena['name'], "Waiting!");
 					}
 				}
             break;
 			case Arena::PLAYING:
-			    foreach($arena->arenas as $name) 
+			    foreach($arenabase->arenas as $arena) 
 				{
-					$arena->arenas[$name]['timeend']--; 
+					$arenabase->arenas[$arena['name']]['timeend']--; 
 					
-					$arena->sendBroadcastPopup(
-					    $name, "Time: ", $arena->arenas[$name]['timeend']
+					$arenabase->sendBroadcastPopup(
+					    $arena['name'], "Time: ", $arenabase->arenas[$arena['name']]['timeend']
 					);
 					
-					if($arena->arenas[$name]['timeend'] == 0) 
+					if($arenabase->arenas[$arena['name']]['timeend'] == 0) 
 				    {
-                        $arena->gameOver($name);
+                        $arenabase->gameOver($arena['name']);
                     }
 				}
             break;
 			case Arena::RESTARTING:
-			    foreach($arena->arenas as $name) 
+			    foreach($arenabase->arenas as $arena) 
 				{
-					$arena->arenas[$name]['timeend']--;
-                    $arena->sendBroadcastPopup(
-					    "Restarting in ", $arena->arenas[$name]['timeend']
+					$arenabase->arenas[$arena['name']]['restarttime']--;
+                    $arenabase->sendBroadcastPopup(
+					    "Restarting in ", $arenabase->arenabase[$arena['name']]['restarttime']
 					);
-                    if($this->restartingtime == 0) 
+                    if($arenabase->arenas[$arena['name']]['restarttime'] == 0) 
 					{				
-					    $arena->reloadDataArena($name);
+					    $arenabase->reloadDataArena($arena['name']);
 					}				
 				}
 			break;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace hachkingtohach1\pvpteam\events;
 
 use hachkingtohach1\pvpteam\Main;
+use hachkingtohach1\pvpteam\Math\Vector3;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -19,14 +20,14 @@ class EventListener implements Listener {
 	/** @var $arena */
 	protected $arena;
 	
-	/** @var $data */
-	protected $data;
+	/** @var $config */
+	protected $config;
 
     public function __construct(Main $plugin) 
 	{
         $this->plugin = $plugin;
 		$this->arena = $this->plugin->getArena();
-		$this->data = $this->plugin->getArenasData;
+		$this->config = $this->plugin->configArena();
         $plugin->getServer()->getPluginManager()->registerEvents($this, $plugin);
     }
 
@@ -34,26 +35,37 @@ class EventListener implements Listener {
 	{
 		$player = $event->getPlayer();
 		$namep = $player->getName();
+		$block = $event->getBlock();
 		$x = $block->getX();
 		$y = $block->getY();
 		$z = $block->getZ();
 		$xyzb = (new Vector3((int)$x, (int)$y, (int)$z))->__toString();
 		if($this->arena->inGame($player) === true) {
 			$event->setCancelled();
-		}
-		switch($this->plugin->setup[$namep][2]) {
-			case 0:
-			    $arena = $this->plugin->setup[$namep][2];
-				$team = $this->plugin->setup[$namep][1];
-			    $this->data->set($arena['spawnteam'][$team], $xyzb);
-				unset($this->plugin->setup[$namep]);
-				$player->sendMessage("SETUP: Done!");
-			break;
-			case 1:
-			    $this->data->set($arena['spawnlobby'], $xyzb);
-				unset($this->plugin->setup[$namep]);
-				$player->sendMessage("SETUP: Done!");
-		    break;
+		}				
+		
+		if(isset($this->plugin->setup[$namep])) {
+			
+			$arena = $this->plugin->setup[$namep][0];
+		    $team = $this->plugin->setup[$namep][1];
+			
+		    switch($this->plugin->setup[$namep][2]) {
+			    case 0:			    				
+				    $this->config->changeSpawnTeamArena($player, $arena, $team, $xyzb);				
+				    unset($this->plugin->setup[$namep]);				
+				    $player->sendMessage("SETUP: Done!");
+			    break;
+			    case 1:
+				    $this->config->changeDataArena($player, $arena, 'spawnlobby', $xyzb);
+				    unset($this->plugin->setup[$namep]);
+				    $player->sendMessage("SETUP: Done!");
+		        break;
+			    case 2:
+				    $this->config->changeDataArena($player, $arena, 'spawnspectator', $xyzb);
+				    unset($this->plugin->setup[$namep]);
+				    $player->sendMessage("SETUP: Done!");
+		        break;
+		    }
 		}
 	}
 	
