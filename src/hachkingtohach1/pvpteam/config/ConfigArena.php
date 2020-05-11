@@ -27,7 +27,7 @@ class ConfigArena {
 		$this->change[$player->getName()][$change] = $data;
 	}
 
-    public function changeDataArena(Player $player, string $namedata, $change, $data)
+    public function changeDataArena(Player $player, string $namedata, string $change, $data)
 	{
 		$this->saveDataInArray(
 		    $player,
