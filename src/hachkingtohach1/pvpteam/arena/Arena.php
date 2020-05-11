@@ -159,34 +159,27 @@ class Arena {
 		}
 	}
 	
-	public function startTheGame() 
+	public function startTheGame(string $name) 
 	{		
-		foreach($this->arenas as $arena) 
-		{
-            if($this->arenas[$arena['name']]['starttime'] == 0) 
-			{			
-		        $this->sendBroadcastMsg($arena['name'], "Started!");
-				$this->arenas[$arena['name']]['status'] = self::PLAYING;			
-			}
-			foreach($this->arenas[$arena['name']]['teams'] as $team)
-			{
+	    foreach($this->arenas[$name]['teams'] as $team)
+		{			
+			$data = $this->arenas[$name]['teams'];
+			
+			$players = $data[$team]['players'];
+			
+		    foreach($this->arenas[$name]['players'] as $player) {
+				
 				$this->playersGame($name);
-				$data = $this->arenas[$arena['name']]['teams'];
-			    $players = $data[$team]['players'];
-				foreach($this->arenas[$arena['name']]['players'] as $player) {
-				    if(!empty($players[$player->getName])) 
-				    {
-			            $player->teleport(
-					        Position::fromObject(
-						        Vector3::fromString($this->arenas[$arena['name']]['spawnteam'][$team])
-								->add(0.5, 0, 0.5), 
-							    $this->getLevel($this->arenas[$arena['name']]['level'])
-						    )
-					    );
-				    }
-				}
+				
+			    $player->teleport(
+					Position::fromObject(
+						Vector3::fromString($this->arenas[$name]['spawnteam'][$team])
+						->add(0.5, 0, 0.5), 
+					    $this->getLevel($this->arenas[$name]['level'])
+					)
+				);	
 			}
-		}		
+		}			
 	}
 	
 	public function gameOver(string $name) 
