@@ -65,6 +65,10 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
+				if(isset($args[1])) {
+					$sender->sendMessage("Usage: /pt create [name]");
+					break;
+				}
 				$object = [		                   			
 				    'minslots' => 2,
 					'maxslots' => 10,
@@ -92,6 +96,10 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
+				if(isset($args[1])) {
+					$sender->sendMessage("Usage: /pt remove [name]");
+					break;
+				}
 				$this->data->remove($args[1]);
 				$sender->sendMessage("Arena with name ".$args[1]." have been removed!");
 			break;
@@ -100,6 +108,10 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
+				if(isset($args[1])) {
+					$sender->sendMessage("Usage: /pt setup [name]");
+					break;
+				}
 				if(empty($this->data->get($args[1]))) {
 					$sender->sendMessage("Arena with name ".$args[1]." not found!");
 					break;
@@ -220,6 +232,10 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
+				if(isset($args[1])) {
+					$sender->sendMessage("Usage: /pt join [name]");
+					break;
+				}
 				if(empty($this->data->get($args[1]))) {
 					$sender->sendMessage("Arena can not found!");
 					break;

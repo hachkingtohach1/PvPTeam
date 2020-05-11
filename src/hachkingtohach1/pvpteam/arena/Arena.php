@@ -122,7 +122,7 @@ class Arena {
 					    $this->getLevel($this->arenas[$arena['name']]['level'])
 				    )
 			    );
-				$player->sendMessage("You are join the game!");				
+				$player->sendMessage("You are joining the game!");				
 			    $this->sendBroadcastMsg($name, "{$player->getName()} has join the game!");
 			}
 		}		
@@ -152,7 +152,7 @@ class Arena {
 			    if(!empty($players[$namep])) 
 				{
 				    unset($players[$namep]);
-				    $player->sendMessage("You are left the game!");
+				    $player->sendMessage("You are lefting the game!");
 					$this->sendBroadcastMsg($name, "{$player->getName()} has left the game!");
 				}				
 		    }
