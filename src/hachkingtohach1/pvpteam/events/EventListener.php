@@ -48,10 +48,11 @@ class EventListener implements Listener {
 			
 			$arena = $this->plugin->setup[$namep][0];
 		    $team = $this->plugin->setup[$namep][1];
+			$color = $this->plugin->setup[$namep][2];
 			
-		    switch($this->plugin->setup[$namep][2]) {
+		    switch($this->plugin->setup[$namep][3]) {
 			    case 0:			    				
-				    $this->config->changeSpawnTeamArena($player, $arena, $team, $xyzb);				
+				    $this->config->changeSpawnTeamArena($player, $arena, $team, $color, $xyzb);				
 				    unset($this->plugin->setup[$namep]);				
 				    $player->sendMessage("SETUP: Done!");
 			    break;

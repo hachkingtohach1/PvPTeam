@@ -39,17 +39,17 @@ class ConfigArena {
 		$this->data->save();
 	}
 	
-	public function changeSpawnTeamArena(Player $player, string $namedata, string $team, $data) 
+	public function changeSpawnTeamArena(Player $player, string $namedata, string $team, string $color, $data) 
 	{
 		$this->change[$player->getName()] 
 		    = 
 		$this->getDataConfig($namedata);
-		$this->change[$player->getName()]['spawnteam'][$team] = $data;
+		$this->change[$player->getName()]['spawnteam'][$color] = $data;
 		$this->data->set($namedata, $this->change[$player->getName()]);
 		$this->data->save();
-	}
+	}	
 	
-	public function addTeamArena(Player $player, string $namedata, string $team) 
+	public function addTeamArena(Player $player, string $namedata, string $team, string $color) 
 	{
 		$this->change[$player->getName()] 
 		    = 
@@ -57,11 +57,24 @@ class ConfigArena {
 		
 		$this->change[$player->getName()]['teams'][$team] = 
 		[
-		  'players' => 0
+		  'players' => 0,
+		  'color' => $color
 		];
 		
 		$this->data->set($namedata, $this->change[$player->getName()]);
 		$this->data->save();
+	}
+	
+	public function checkDataConfig(string $name) : bool
+	{
+		if(
+		    !is_array($this->data->get("teams")) ||
+			!is_array($this->data->get("spawnteam")) ||
+			$this->data->get("spawnteam") === null ||
+			$this->data->get("spawnspectator") === null ||
+			$this->data->get("level") === null ||
+		) return false;
+		return true;
 	}
 }
 	

@@ -65,7 +65,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
-				if(isset($args[1])) {
+				if(!isset($args[1])) {
 					$sender->sendMessage("Usage: /pt create [name]");
 					break;
 				}
@@ -78,6 +78,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
 					'status' => 0,
 					'maxslotsperteam' => 2,
 					'teams' => [],
+					'points' => [],
 					'players' => [],
 					'spectators' => [],
                     'spawnteam' => [],
@@ -96,7 +97,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
-				if(isset($args[1])) {
+				if(!isset($args[1])) {
 					$sender->sendMessage("Usage: /pt remove [name]");
 					break;
 				}
@@ -108,7 +109,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
-				if(isset($args[1])) {
+				if(!isset($args[1])) {
 					$sender->sendMessage("Usage: /pt setup [name]");
 					break;
 				}
@@ -178,6 +179,10 @@ class Commands extends Command implements PluginIdentifiableCommand {
 							$sender->sendMessage("Usage: /pt setup [name] enable [true/false]");
 							break;
 						}
+						if($this->config->checkDataConfig($args[1]) === false) {
+							$sender->sendMessage("SETUP: The data check seems like you didn't finish it right!");
+							break;
+						}
 						$this->config->changeDataArena($sender, $args[1], 'starttime', $args[3]);
 						$sender->sendMessage("SETUP: Starttime for arena ".$args[1]." is ".$args[3]);
 					break;
@@ -190,12 +195,14 @@ class Commands extends Command implements PluginIdentifiableCommand {
 						$sender->sendMessage("SETUP: Restarttime for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'teams':
-					    if(!isset($args[3])) {
-							$sender->sendMessage("Usage: /pt setup [name] teams [name]");
+					    if(!isset($args[3]) or !isset($args[4])) {
+							$sender->sendMessage("Usage: /pt setup [name] teams [name_team] [color_team]");
 							break;
 						}
-						$this->config->addTeamArena($sender, $args[1], $args[3]);
+						$this->config->addTeamArena($sender, $args[1], $args[3], $args[4]);
 						$sender->sendMessage("SETUP: New team for arena ".$args[1]." is ".$args[3]);
+						$sender->sendMessage("SETUP: Now to break one block to set spawn for team ".$args[3]);
+					    $this->plugin->setup[$sender->getName()] = [$args[1], $args[4], $args[3], 0];
 					break;
 					case 'maxslotsperteam':
 					    if(!isset($args[3])) {
@@ -215,15 +222,15 @@ class Commands extends Command implements PluginIdentifiableCommand {
 							break;
 						}							
 						$sender->sendMessage("SETUP: Now to break one block to set spawn for team ".$args[3]);
-					    $this->plugin->setup[$sender->getName()] = [$args[1], $args[3], 0];
+					    $this->plugin->setup[$sender->getName()] = [$args[1], $args[3], null, 0];
 					break;
 					case 'setspawnlobby':					
 						$sender->sendMessage("SETUP: Now to break one block to set spawn lobby ");
-					    $this->plugin->setup[$sender->getName()] = [$args[1], null, 1];
+					    $this->plugin->setup[$sender->getName()] = [$args[1], null, null, 1];
 					break;
 					case 'setspawnspectator':
 					    $sender->sendMessage("SETUP: Now to break one block to set spawn spectator");
-					    $this->plugin->setup[$sender->getName()] = [$args[1], null, 2];
+					    $this->plugin->setup[$sender->getName()] = [$args[1], null, null, 2];
 					break;
 				}
 			break;
@@ -232,7 +239,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("You have not permissions to use this command!");
                     break;
                 }
-				if(isset($args[1])) {
+				if(!isset($args[1])) {
 					$sender->sendMessage("Usage: /pt join [name]");
 					break;
 				}

@@ -13,7 +13,7 @@ class ArenaScheduler extends Task {
     public $plugin;
 	
 	/** @var $minplayers */
-	public $minplayers = 2;
+	public $minplayers = 1;
 	
 	public $gotostart = false;
  
@@ -38,37 +38,39 @@ class ArenaScheduler extends Task {
             switch($status) 
 		    {
                 case Arena::WAITING:
-			       	if(count($arena['players']) >= $this->minplayers 
+			       	if(count($arenabase->arenas[$arena['name']]['players']) >= $this->minplayers 
 					    || $this->gotostart
-					) {
-						
-						$arena['starttime'] -= 1;
-						$this->sendBroadcastPopup($arena['name'], "Starting in ".$arena['starttime']);
+					) {	
+                        $arenabase->sendBroadcastPopup($arena['name'], "Starting in ".$arena['starttime']);
+						$arenabase->arenas[$arena['name']]['starttime']--;					
 						if($arena['starttime'] == 0) 
 						{
-							
-						}
+							$arenabase->startTheGame($arena['name']);
+						}													
 					} else {						
-						$arenabase->sendBroadcastPopup($arena['name'], "Waiting!");
+						$arenabase->sendBroadcastPopup($arenabase->arenas[$arena['name']]['name'], "Waiting!");
 					}
                 break;
 			    case Arena::PLAYING:
-					$arena['timeend'] -= 1;
-					$arenabase->sendBroadcastPopup($arena['name'], "Time end: ".$arena['timeend']);
-					if($arena['timeend'] == 0) {
-						$arenabase->gameOver($arena['name']);
+					$arenabase->arenas[$arena['name']]['timeend']--;
+					$arenabase->sendBroadcastPopup($arenabase->arenas[$arena['name']], "Time end: ".$arenabase->arenas[$arena['name']]['timeend']);
+					if($arenabase->arenas[$arena['name']]['timeend'] == 0) 
+					{						
+						$arenabase->gameOver($arenabase->arenas[$arena['name']]);
 					}
                 break;
 			    case Arena::RESTARTING:
-			        $arena['restarttime'] -= 1;
-					$arenabase->sendBroadcastPopup($arena['name'], "Restarting in ".$arena['restarttime']);
-					if($arena['restarttime'] == 0) {
-						foreach($arena['players'] as $player) {
+			        $arenabase->arenas[$arena['name']]['restarttime']--;
+					$arenabase->sendBroadcastPopup($arenabase->arenas[$arena['name']], "Restarting in ".$arenabase->arenas[$arena['name']]['restarttime']);
+					if($arenabase->arenas[$arena['name']]['restarttime'] == 0) 
+					{
+						foreach($arenabase->arenas[$arena['name']]['players'] as $player) 
+						{
 						    $player->teleport(
 							    $arenabase->plugin->getServer()->getDefaultLevel()->getSpawnLocation()
 							);
 						}
-						$arenabase->reloadDataArena($arena['name']);
+						$arenabase->reloadDataArena($arenabase->arenas[$arena['name']]);
 					}
 			    break;
 			}

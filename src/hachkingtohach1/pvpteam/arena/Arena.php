@@ -162,18 +162,16 @@ class Arena {
 	public function startTheGame(string $name) 
 	{		
 	    foreach($this->arenas[$name]['teams'] as $team)
-		{			
-			$data = $this->arenas[$name]['teams'];
+		{					
+			$players = $team['players'];
 			
-			$players = $data[$team]['players'];
-			
-		    foreach($this->arenas[$name]['players'] as $player) {
-				
+		    foreach($players as $player) 
+			{				
 				$this->playersGame($name);
 				
 			    $player->teleport(
 					Position::fromObject(
-						Vector3::fromString($this->arenas[$name]['spawnteam'][$team])
+						Vector3::fromString($this->arenas[$name]['spawnteam'][$team['Color']])
 						->add(0.5, 0, 0.5), 
 					    $this->getLevel($this->arenas[$name]['level'])
 					)
