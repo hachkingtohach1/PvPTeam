@@ -72,7 +72,7 @@ class ConfigArena {
 			!is_array($this->data->get("spawnteam")) ||
 			$this->data->get("spawnteam") === null ||
 			$this->data->get("spawnspectator") === null ||
-			$this->data->get("level") === null ||
+			$this->data->get("level") === null 
 		) return false;
 		return true;
 	}

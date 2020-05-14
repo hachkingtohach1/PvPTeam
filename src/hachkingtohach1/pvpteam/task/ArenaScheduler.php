@@ -13,8 +13,9 @@ class ArenaScheduler extends Task {
     public $plugin;
 	
 	/** @var $minplayers */
-	public $minplayers = 1;
+	public $minplayers = 1; // This is testing if you needed!
 	
+	/** @var bool $gotostart */
 	public $gotostart = false;
  
     public function __construct(Arena $plugin) 

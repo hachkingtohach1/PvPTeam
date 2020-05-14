@@ -53,8 +53,18 @@ class Main extends PluginBase {
 	public function loadArenas() 
 	{
 		foreach($this->getArenasData->getAll() as $name => $data) 
-		{
-			$new = new Arena($this, $data['name'], $data, true);
+		{    
+		    if($data['enable'] === true) 
+			{
+			    $new = new Arena($this, $data['name'], $data, true);
+				$this->plugin->getLogger()->warning(
+				    $data['name'].' can not load data!'
+				);
+			} else {
+				$this->plugin->getLogger()->info(
+				    $data['name'].' loaded!'
+				);
+			}
 		}
 	}
 	

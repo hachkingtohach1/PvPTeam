@@ -43,7 +43,8 @@ class Arena {
 	{
 		$this->plugin = $plugin;
 		$this->getdata = $this->plugin->getArenasData;
-		if(!$load) {		
+		if(!$load) 
+		{		
 		    $this->arenas[$namearena] = $this->getdata->get($namearena);
 			$this->LoadLevelArena();
 			$this->loaded = true;
@@ -59,11 +60,13 @@ class Arena {
 			$world = $name['level'];
 			$name = $name['name'];
 			if($world === null) return;
-		    if(!$this->plugin->getServer()->isLevelGenerated($world)) {
+		    if(!$this->plugin->getServer()->isLevelGenerated($world)) 
+			{
 				$this->plugin->getLogger()->warning($name.' can not load level');
                 return;
 			}
-		    if(!$this->plugin->getServer()->isLevelLoaded($world)) {
+		    if(!$this->plugin->getServer()->isLevelLoaded($world)) 
+			{
                 $this->plugin->getServer()->loadLevel($world);
 			}
 		}
@@ -74,7 +77,8 @@ class Arena {
 		$namep = $player->getName();
 	    $arena = $this->arenas[$name];
 			
-		if($arena['name'] == $name) {
+		if($arena['name'] == $name) 
+		{
 			
 		    if(
 		        count($this->arenas[$arena['name']]['players'])
@@ -119,11 +123,11 @@ class Arena {
 				    Position::fromObject(
 					    Vector3::fromString($this->arenas[$arena['name']]['spawnlobby'])
 					    ->add(0.5, 0, 0.5), 
-					    $this->getLevel($this->arenas[$arena['name']]['level'])
+					    $this->getLevel($this->arenas[$arena['name']]['level'])						
 				    )
 			    );
-				$player->sendMessage("You are joining the game!");				
-			    $this->sendBroadcastMsg($name, "{$player->getName()} has join the game!");
+                $player->sendMessage("You are joining the game!");				
+			    $this->sendBroadcastMsg($name, "{$player->getName()} has join the game!");				
 			}
 		}		
 	}
@@ -161,6 +165,8 @@ class Arena {
 	
 	public function startTheGame(string $name) 
 	{		
+	    $this->arenas[$name]['status'] = self::PLAYING;
+		
 	    foreach($this->arenas[$name]['teams'] as $team)
 		{					
 			$players = $team['players'];
@@ -177,7 +183,7 @@ class Arena {
 					)
 				);	
 			}
-		}			
+		}	       		
 	}
 	
 	public function gameOver(string $name) 

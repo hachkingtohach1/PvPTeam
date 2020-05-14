@@ -10,6 +10,9 @@ use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\event\player\PlayerExhaustEvent;
+use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\Listener;
 
 class EventListener implements Listener {
@@ -41,7 +44,7 @@ class EventListener implements Listener {
 		$z = $block->getZ();
 		$xyzb = (new Vector3((int)$x, (int)$y, (int)$z))->__toString();
 		if($this->arena->inGame($player) === true) {
-			$event->setCancelled();
+			$event->setCancelled(true);
 		}				
 		
 		if(isset($this->plugin->setup[$namep])) {
@@ -70,11 +73,56 @@ class EventListener implements Listener {
 		}
 	}
 	
+	public function onDamage(EntityDamageEvent $event) : void
+	{
+        $player = $event->getEntity();
+        if($event->getFinalDamage() >= $player->getHealth()) 
+		{
+			foreach($this->arena->arenas as $arena)
+			{			
+                foreach($arena['teams'] as $team)
+				{			
+			        $players = $team['players'];
+			
+		            if(!empty($players[$player->getName()])) 
+					{
+						$player->teleport(
+				            Position::fromObject(
+					            Vector3::fromString($this->arenas[$name]['spawnteam'][$team['Color']])
+					            ->add(0.5, 0, 0.5), 
+					            $this->getLevel($this->arenas[$name]['level'])
+				            )
+			            );
+					}
+				}
+			}			
+		}
+	}
+	
 	public function onBlockPlace(BlockPlaceEvent $event) : void
 	{
 		$player = $event->getPlayer();
-		if($this->arena->inGame($player) === true) {
-			$event->setCancelled();
+		if($this->arena->inGame($player) === true) 
+		{
+			$event->setCancelled(true);
+		}
+	}
+	
+	public function onQuit(PlayerQuitEvent $event) : void
+	{
+		$player = $event->getPlayer();
+		if($this->arena->inGame($player) === true) 
+		{
+			$this->arena->onLeaveArena($player, false);
+		}
+	}
+	
+	public function onExhaust(PlayerExhaustEvent $event) : void 
+	{
+		$player = $event->getPlayer();
+		if($this->arena->inGame($player) === true) 
+		{
+			$event->setCancelled(true);
 		}
 	}
 }
