@@ -6,6 +6,7 @@ namespace hachkingtohach1\pvpteam\arena;
 
 use hachkingtohach1\pvpteam\Main;
 use hachkingtohach1\pvpteam\math\Vector3;
+use hachkingtohach1\pvpteam\language\Language;
 use hachkingtohach1\pvpteam\task\ArenaScheduler;
 use pocketmine\Player;
 use pocketmine\level\Level;
@@ -24,6 +25,9 @@ class Arena {
 	
 	/** @var $scheduler */
 	public $scheduler;
+	
+	/** @var $language */
+	public $language;
 	
 	/** @var array */
 	public $arenas = [];
@@ -51,7 +55,8 @@ class Arena {
 		}
 		$this->plugin->getScheduler()->scheduleRepeatingTask
 		($this->scheduler = new ArenaScheduler($this), 20);
-    }		
+		$this->language = new Language($this->plugin);
+    }	
 
     public function LoadLevelArena() 
 	{
@@ -85,7 +90,7 @@ class Arena {
 		        == 
 			    $this->arenas[$arena['name']]['maxslots']
 		    ) {
-			    $player->sendMessage("Arena is full!");
+			    $player->sendMessage($this->translate('full_slots'));
 		    }
 			
             if(!$spectator) 
@@ -126,8 +131,8 @@ class Arena {
 					    $this->getLevel($this->arenas[$arena['name']]['level'])						
 				    )
 			    );
-                $player->sendMessage("You are joining the game!");				
-			    $this->sendBroadcastMsg($name, "{$player->getName()} has join the game!");				
+                $player->sendMessage($this->translate('joining_the_game'));				
+			    $this->sendBroadcastMsg($name, str_replace("%player", $namep, $this->translate('broacast_new_player_join')));				
 			}
 		}		
 	}
@@ -142,7 +147,7 @@ class Arena {
 			{
 			    $spectator = $this->arenas[$arena['name']]['spectators'];
 			    unset($spectator[$player->getName()]);
-				$player->sendMessage("You are left the game!");
+				$player->sendMessage($this->translate('lefting_the_game'));
 			    return;
 			}
 			
@@ -156,8 +161,8 @@ class Arena {
 			    if(!empty($players[$namep])) 
 				{
 				    unset($players[$namep]);
-				    $player->sendMessage("You are lefting the game!");
-					$this->sendBroadcastMsg($name, "{$player->getName()} has left the game!");
+				    $player->sendMessage($this->translate('lefting_the_game'));
+					$this->sendBroadcastMsg($name, str_replace("%player", $namep, $this->translate('broacast_one_player_lefting')));			
 				}				
 		    }
 		}
@@ -188,7 +193,7 @@ class Arena {
 	
 	public function gameOver(string $name) 
 	{		
-		$this->sendBroadcastMsg($name, "Game Over!");
+		$this->sendBroadcastMsg($name, $this->translate('game_over'));
 		$this->playersGame($name);
 		$this->arenas[$name]['status'] = self::RESTARTING;			
 	}
@@ -233,6 +238,12 @@ class Arena {
 		{
 			$player->sendMessage($text);
 		}
+	}
+	
+	public function translate(string $name) 
+	{
+		$lang = $this->language->translateLang($name);
+		return $lang;
 	}
 	
 	public function sendBroadcastPopup(string $name, string $text) 

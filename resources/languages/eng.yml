@@ -1,2 +1,17 @@
 ---
+## Author: DragoVN 
+
+## Status for arenas ##
+full_slots: "Arena is full!"
+
+## ??? ##
+joining_the_game: "You are joining the game!"
+lefting_the_game: "You are left the game!"
+
+## InArena ##
+broacast_new_player_join: "%player has join the game!"
+broacast_one_player_lefting: "%player has left the game!"
+
+# Titles InGame #
+game_over: "Game Over!"
 ...
