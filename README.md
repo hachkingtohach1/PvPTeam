@@ -16,11 +16,11 @@ This is one minigame for PMMP (But it is not complete, so dont use it!)
 </div>
 ## Commands 
 | --- | --- | --- |
-| Main commands | Type: /pt help |
-| /pt help : Displays list of commands |
-| /pt create : Create arena |
-| /pt remove : Remove arena |
-| /pt setup : Setup arena |
-| /pt join : Join arena |
-| /pt list : Displays list of arenas |
+| Main commands | Type| /pt help |
+| /pt help | Displays list of commands |
+| /pt create | Create arena |
+| /pt remove | Remove arena |
+| /pt setup | Setup arena |
+| /pt join | Join arena |
+| /pt list | Displays list of arenas |
 <br>
