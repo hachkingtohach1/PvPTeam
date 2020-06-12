@@ -23,11 +23,16 @@ class Main extends PluginBase {
 	/** @var $eventListener */
 	public $eventListener;
 	
+	/** @var $language */
+	public $language;
+	
     public function onEnable() : void
 	{
+		$this->saveDefaultConfig();
 		$this->newConfigFile();
 		$this->loadArenas();
-		$this->eventListener = new EventListener($this);
+		$this->checkLanguage();
+		$this->eventListener = new EventListener($this);	
 		$this->getServer()->getCommandMap()->register("pvpteam", new Commands($this));
 	}
 	
@@ -45,7 +50,14 @@ class Main extends PluginBase {
 	public function newConfigFile() 
 	{
 		$datafolder = $this->getDataFolder();
-		$this->getArenasData = $this->newConfig($datafolder."arenas.yml");
+		$this->getArenasData = $this->newConfig($datafolder.'arenas.yml');
+	}
+	
+	public function checkLanguage()
+	{
+		$datafolder = $this->getDataFolder();
+		$lang = $this->getConfig()->get('name_lang'); // This is for yml
+		$this->language = $this->newConfig($datafolder."language/".$lang);
 	}
 
     public function configArena() { return (new ConfigArena($this)); }		
@@ -57,24 +69,24 @@ class Main extends PluginBase {
 		    if($data['enable'] === true) 
 			{
 			    $new = new Arena($this, $data['name'], $data, true);
-				$this->plugin->getLogger()->warning(
+				$this->getLogger()->warning(
 				    $data['name'].' can not load data!'
 				);
 			} else {
-				$this->plugin->getLogger()->info(
+				$this->getLogger()->info(
 				    $data['name'].' loaded!'
 				);
 			}
 		}
 	}
 	
-	public function getArena() 
+	public function getArena()
 	{
 		foreach($this->getArenasData->getAll() as $name => $data) 
 		{
 			$new = new Arena($this, $name, $data, false);
-			return $new;
-		}
+			return $new;		
+		}		
 	}
 }
 	

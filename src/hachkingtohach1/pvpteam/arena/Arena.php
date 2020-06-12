@@ -195,17 +195,19 @@ class Arena {
 
     public function inGame(Player $player) : bool
 	{
-		$namep = $player->getName();		
+		$namep = $player->getName();
+		
+        if(!isset($this->player[$namep])) {
+			return false;	
+		}
+		
 		foreach($this->arenas as $arena) 
-		{			
-		    foreach($this->arenas[$arena['name']]['teams'] as $team) 
-			{			
-			    $players = $team['players'];
-				if(!empty($players[$namep])) 
-				{
-					return true;
-				} 				
-			}
+		{					
+			$players = $this->arenas[$arena['name']]['players'];
+			if(!empty($players[$namep])) 
+			{
+				return true;
+			} 				
 		}
 		return false;
 	}

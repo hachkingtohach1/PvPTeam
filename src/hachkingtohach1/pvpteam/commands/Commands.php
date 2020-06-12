@@ -175,7 +175,7 @@ class Commands extends Command implements PluginIdentifiableCommand {
 						$sender->sendMessage("SETUP: Starttime for arena ".$args[1]." is ".$args[3]);
 					break;
 					case 'enable':
-					    if(!isset($args[3]) or in_array($args[3], [true, false])) {
+					    if(!isset($args[3]) or !in_array($args[3], ['true', 'false'])) {
 							$sender->sendMessage("Usage: /pt setup [name] enable [true/false]");
 							break;
 						}
@@ -255,9 +255,9 @@ class Commands extends Command implements PluginIdentifiableCommand {
                     break;
                 }
 			    foreach($this->plugin->getArena()->arenas as $name) {
-					$status = $name['where'];
+					$status = $name['enable'];
 					$sender->sendMessage("--- List Arenas ---");
-					$sender->sendMessage($name." | ".$status);
+					$sender->sendMessage($name['name']." | ".$status['enable']);
 				}
 			break;
 		}

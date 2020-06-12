@@ -57,7 +57,7 @@ class ConfigArena {
 		
 		$this->change[$player->getName()]['teams'][$team] = 
 		[
-		  'players' => 0,
+		  'players' => [],
 		  'color' => $color
 		];
 		

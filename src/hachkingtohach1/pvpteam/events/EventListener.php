@@ -21,10 +21,10 @@ class EventListener implements Listener {
     public $plugin;
 	
 	/** @var $arena */
-	protected $arena;
+	public $arena;
 	
 	/** @var $config */
-	protected $config;
+	public $config;
 
     public function __construct(Main $plugin) 
 	{
@@ -43,6 +43,7 @@ class EventListener implements Listener {
 		$y = $block->getY();
 		$z = $block->getZ();
 		$xyzb = (new Vector3((int)$x, (int)$y, (int)$z))->__toString();
+		
 		if($this->arena->inGame($player) === true) {
 			$event->setCancelled(true);
 		}				

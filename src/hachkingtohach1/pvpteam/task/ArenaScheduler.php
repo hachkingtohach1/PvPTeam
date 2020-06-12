@@ -49,12 +49,12 @@ class ArenaScheduler extends Task {
 							$arenabase->startTheGame($arena['name']);
 						}													
 					} else {						
-						$arenabase->sendBroadcastPopup($arenabase->arenas[$arena['name']]['name'], "Waiting!");
+						$arenabase->sendBroadcastPopup($arena['name'], "Waiting!");
 					}
                 break;
 			    case Arena::PLAYING:
 					$arenabase->arenas[$arena['name']]['timeend']--;
-					$arenabase->sendBroadcastPopup($arenabase->arenas[$arena['name']], "Time end: ".$arenabase->arenas[$arena['name']]['timeend']);
+					$arenabase->sendBroadcastPopup($arena['name'], "Time end: ".$arenabase->arenas[$arena['name']]['timeend']);
 					if($arenabase->arenas[$arena['name']]['timeend'] == 0) 
 					{						
 						$arenabase->gameOver($arenabase->arenas[$arena['name']]);
@@ -62,7 +62,7 @@ class ArenaScheduler extends Task {
                 break;
 			    case Arena::RESTARTING:
 			        $arenabase->arenas[$arena['name']]['restarttime']--;
-					$arenabase->sendBroadcastPopup($arenabase->arenas[$arena['name']], "Restarting in ".$arenabase->arenas[$arena['name']]['restarttime']);
+					$arenabase->sendBroadcastPopup($arena['name'], "Restarting in ".$arenabase->arenas[$arena['name']]['restarttime']);
 					if($arenabase->arenas[$arena['name']]['restarttime'] == 0) 
 					{
 						foreach($arenabase->arenas[$arena['name']]['players'] as $player) 
