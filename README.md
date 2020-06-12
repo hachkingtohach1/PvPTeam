@@ -13,7 +13,7 @@ This is one minigame for PMMP (But it is not complete, so dont use it!)
 - ✔ Spawn lobby waiting
 - ❌ Support + custom languages
 - 👍 Update comming soon !
-
+</div>
 ## Commands 
 | Main commands | Type: /pt help |
 |/pt help : Displays list of commands|
@@ -22,3 +22,4 @@ This is one minigame for PMMP (But it is not complete, so dont use it!)
 |/pt setup : Setup arena|
 |/pt join : Join arena|
 |/pt list : Displays list of arenas|
+<br>
