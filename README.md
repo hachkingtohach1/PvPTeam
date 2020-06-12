@@ -11,4 +11,5 @@ This is one minigame for PMMP (But it is not complete, so dont use it!)
 - ✔ Custom all
 - ❌ Kits for teams
 - ✔ Spawn lobby waiting
+- ✔ Support + custom languages
 - 👍 Update comming soon !
