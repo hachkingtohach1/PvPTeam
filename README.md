@@ -15,6 +15,7 @@ This is one minigame for PMMP (But it is not complete, so dont use it!)
 - 👍 Update comming soon !
 </div>
 ## Commands 
+| --- | --- | --- |
 | Main commands | Type: /pt help |
 | /pt help : Displays list of commands |
 | /pt create : Create arena |
